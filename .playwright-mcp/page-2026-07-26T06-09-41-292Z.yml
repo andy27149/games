@@ -1,0 +1,8 @@
+- generic [ref=f2e4]:
+  - generic [ref=f2e5]:
+    - heading "精灵物语" [level=1] [ref=f2e6]
+    - paragraph [ref=f2e7]: Pocket Creature Adventure
+  - generic [ref=f2e8]:
+    - button "继续游戏" [ref=f2e9]
+    - button "新游戏" [ref=f2e10]
+  - paragraph [ref=f2e11]: 按下按钮开始你的冒险

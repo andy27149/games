@@ -1,0 +1,14 @@
+- generic [ref=f1e3]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Pyrocub
+          - generic: 40/40
+      - generic:
+        - generic:
+          - generic: Aquabub
+          - generic: 44/44
+    - generic:
+      - generic: 按 M 打开菜单
+      - generic: 空格键与NPC互动

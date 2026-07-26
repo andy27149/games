@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type { CreatureInstance } from '../types/creature';
 import type { SaveData } from '../types/save';
+import { species } from '../data/species';
+import { maps } from '../data/maps';
 
 const SAVE_KEY = 'pokerpg-save';
 
@@ -21,6 +23,8 @@ interface PlayerState {
   setFlag: (flag: string, value: boolean) => void;
   setParty: (party: CreatureInstance[]) => void;
   updateCreatureHp: (index: number, currentHp: number) => void;
+  /** 队伍团灭后送回出生点并回满血，仿照正统 Pokémon 的黑屏机制。 */
+  handleBlackout: () => void;
 
   hasSave: () => boolean;
   save: () => void;
@@ -58,6 +62,16 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     set((state) => ({
       party: state.party.map((c, i) => (i === index ? { ...c, currentHp } : c)),
     })),
+
+  handleBlackout: () => {
+    const state = get();
+    const healedParty = state.party.map((c) => {
+      const sp = species.find((s) => s.id === c.speciesId);
+      return sp ? { ...c, currentHp: sp.baseStats.hp } : c;
+    });
+    const spawn = maps[state.mapId]?.playerSpawn ?? { x: state.x, y: state.y };
+    set({ party: healedParty, x: spawn.x, y: spawn.y, facing: 'down' });
+  },
 
   hasSave: () => localStorage.getItem(SAVE_KEY) !== null,
 

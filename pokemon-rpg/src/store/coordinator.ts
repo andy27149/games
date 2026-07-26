@@ -6,6 +6,7 @@ export type GameMode = 'title' | 'overworld' | 'battle' | 'dialogue' | 'menu';
 export interface BattleContext {
   speciesId: string;
   onWinSetFlag?: string;
+  isWild?: boolean;
 }
 
 interface CoordinatorState {
@@ -15,7 +16,7 @@ interface CoordinatorState {
   goToTitle: () => void;
   enterOverworld: () => void;
   enterBattle: (ctx: BattleContext) => void;
-  exitBattle: (result: 'win' | 'lose' | 'flee') => void;
+  exitBattle: (result: 'win' | 'lose' | 'flee' | 'caught') => void;
   enterDialogue: () => void;
   exitDialogue: () => void;
   openMenu: () => void;
@@ -41,6 +42,9 @@ export const useCoordinator = create<CoordinatorState>((set, get) => ({
     const ctx = get().battleContext;
     if (result === 'win' && ctx?.onWinSetFlag) {
       usePlayerStore.getState().setFlag(ctx.onWinSetFlag, true);
+    }
+    if (result === 'lose') {
+      usePlayerStore.getState().handleBlackout();
     }
     set({ mode: 'overworld', battleContext: null });
   },

@@ -1,0 +1,12 @@
+- generic [ref=f12e4]:
+  - generic [ref=f12e5]:
+    - heading "精灵物语" [level=1] [ref=f12e6]
+    - paragraph [ref=f12e7]: Pocket Creature Adventure
+  - button "新游戏 开始你的第一次冒险" [ref=f12e9]:
+    - generic [ref=f12e10]: 新游戏
+    - generic [ref=f12e11]: 开始你的第一次冒险
+  - generic [ref=f12e12]:
+    - generic [ref=f12e13]: 操作说明
+    - generic [ref=f12e14]: 方向键 / WASD 移动
+    - generic [ref=f12e15]: 空格键 / Enter 与NPC互动、推进对话
+    - generic [ref=f12e16]: M 或 Esc 打开菜单
