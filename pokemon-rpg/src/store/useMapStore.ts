@@ -3,7 +3,6 @@ import type { MapDef } from '../types/map';
 import { maps } from '../data/maps';
 import { usePlayerStore } from '../store/usePlayerStore';
 import { useCoordinator } from '../store/coordinator';
-import { useBattleStore } from '../store/useBattleStore';
 import { useDialogueStore } from '../store/useDialogueStore';
 
 type Facing = 'up' | 'down' | 'left' | 'right';
@@ -58,10 +57,7 @@ export const useMapStore = create<MapState>((set, get) => ({
       mapDef.tiles[targetY][targetX] === 'tallgrass' &&
       Math.random() < mapDef.encounterRate
     ) {
-      const pool = mapDef.encounterSpeciesIds;
-      const speciesId = pool[Math.floor(Math.random() * pool.length)];
-      useCoordinator.getState().enterBattle({ speciesId, isWild: true });
-      useBattleStore.getState().startBattle(speciesId);
+      useCoordinator.getState().beginBattleSetup({ enemyPool: mapDef.encounterSpeciesIds, isWild: true });
     }
   },
 

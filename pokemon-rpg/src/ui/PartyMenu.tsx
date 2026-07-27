@@ -3,6 +3,7 @@ import { usePlayerStore } from '../store/usePlayerStore';
 import { useCoordinator } from '../store/coordinator';
 import { species } from '../data/species';
 import { quests } from '../data/quests';
+import { TYPE_LABELS } from '../data/typeLabels';
 import { sfx } from '../audio/audioManager';
 import type { Species } from '../types/creature';
 
@@ -56,7 +57,7 @@ export default function PartyMenu() {
                   />
                   <div className="flex-1">
                     <div className="flex justify-between text-sm">
-                      <span className="font-semibold text-white">{sp.name}</span>
+                      <span className="font-semibold text-white">{sp.name}（{TYPE_LABELS[sp.type]}）</span>
                       <span className="text-slate-400">{creature.currentHp}/{maxHp}</span>
                     </div>
                     <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden mt-1">

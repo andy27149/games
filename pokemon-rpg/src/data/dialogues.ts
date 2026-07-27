@@ -11,7 +11,7 @@ export const dialogues: Record<string, DialogueScript> = {
       { speaker: '劲敌', text: '拿出你的精灵吧，让我看看你这段时间到底有没有偷懒！' },
     ],
     onComplete: {
-      startBattleSpeciesId: 'tumbleroo',
+      startBattleSpeciesIds: ['draconyx', 'tumbleroo', 'pyrocub'],
       onWinSetFlag: 'questDefeatedRival',
     },
   },

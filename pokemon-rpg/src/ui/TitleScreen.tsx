@@ -1,6 +1,7 @@
 import { usePlayerStore } from '../store/usePlayerStore';
 import { useCoordinator } from '../store/coordinator';
 import { species } from '../data/species';
+import { maps } from '../data/maps';
 import { sfx } from '../audio/audioManager';
 
 function getStartingHp(speciesId: string): number {
@@ -10,8 +11,8 @@ function getStartingHp(speciesId: string): number {
 
 function startNewGame(): void {
   usePlayerStore.getState().initNewGame(
-    'route1',
-    { x: 6, y: 8 },
+    maps.route1.id,
+    maps.route1.playerSpawn,
     [
       { speciesId: 'pyrocub', currentHp: getStartingHp('pyrocub') },
       { speciesId: 'aquabub', currentHp: getStartingHp('aquabub') },

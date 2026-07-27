@@ -21,6 +21,13 @@ const FACING_ANGLE: Record<Facing, number> = {
   up: -Math.PI / 2,
 };
 
+const VIEWPORT_TILES_X = 14;
+const VIEWPORT_TILES_Y = 12;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
 function MapCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mapDef = useMapStore((s) => s.mapDef);
@@ -93,30 +100,38 @@ function MapCanvas() {
     if (!ctx) return;
 
     const { width, height, tileSize, tiles, npcs } = mapDef;
-    canvas.width = width * tileSize;
-    canvas.height = height * tileSize;
+    const viewportTilesX = Math.min(VIEWPORT_TILES_X, width);
+    const viewportTilesY = Math.min(VIEWPORT_TILES_Y, height);
+    canvas.width = viewportTilesX * tileSize;
+    canvas.height = viewportTilesY * tileSize;
 
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
+    const cameraX = clamp(playerX - Math.floor(viewportTilesX / 2), 0, Math.max(0, width - viewportTilesX));
+    const cameraY = clamp(playerY - Math.floor(viewportTilesY / 2), 0, Math.max(0, height - viewportTilesY));
+
+    for (let y = cameraY; y < cameraY + viewportTilesY; y++) {
+      for (let x = cameraX; x < cameraX + viewportTilesX; x++) {
         ctx.fillStyle = TILE_COLORS[tiles[y][x]];
-        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+        ctx.fillRect((x - cameraX) * tileSize, (y - cameraY) * tileSize, tileSize, tileSize);
       }
     }
 
     const npcPad = tileSize * 0.15;
     for (const npc of npcs) {
+      if (npc.x < cameraX || npc.x >= cameraX + viewportTilesX || npc.y < cameraY || npc.y >= cameraY + viewportTilesY) {
+        continue;
+      }
       ctx.fillStyle = npc.color;
       ctx.fillRect(
-        npc.x * tileSize + npcPad,
-        npc.y * tileSize + npcPad,
+        (npc.x - cameraX) * tileSize + npcPad,
+        (npc.y - cameraY) * tileSize + npcPad,
         tileSize - npcPad * 2,
         tileSize - npcPad * 2,
       );
     }
 
     // 玩家：一个指向 facing 方向的三角形
-    const cx = playerX * tileSize + tileSize / 2;
-    const cy = playerY * tileSize + tileSize / 2;
+    const cx = (playerX - cameraX) * tileSize + tileSize / 2;
+    const cy = (playerY - cameraY) * tileSize + tileSize / 2;
     const r = tileSize * 0.35;
     const angle = FACING_ANGLE[playerFacing];
     const spread = (2 * Math.PI) / 3;

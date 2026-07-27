@@ -5,6 +5,7 @@ import { usePlayerStore } from '../store/usePlayerStore';
 import { useCoordinator } from '../store/coordinator';
 import { species } from '../data/species';
 import { moves } from '../data/moves';
+import { TYPE_LABELS } from '../data/typeLabels';
 import type { Species } from '../types/creature';
 import { sfx } from '../audio/audioManager';
 
@@ -14,6 +15,10 @@ function getSpecies(speciesId: string): Species | undefined {
 
 function getMoveName(moveId: string): string {
   return moves.find((m) => m.id === moveId)?.name ?? moveId;
+}
+
+function speciesLabel(sp: Species): string {
+  return `${sp.name}（${TYPE_LABELS[sp.type]}）`;
 }
 
 function CreatureShape({ color, shape, size = 72 }: { color: string; shape: Species['shape']; size?: number }) {
@@ -48,26 +53,27 @@ function HpBar({ current, max }: { current: number; max: number }) {
 }
 
 export default function BattleScreen() {
-  const enemySpeciesId = useBattleStore((s) => s.enemySpeciesId);
-  const enemyHp = useBattleStore((s) => s.enemyHp);
-  const enemyMaxHp = useBattleStore((s) => s.enemyMaxHp);
-  const activeIndex = useBattleStore((s) => s.activeIndex);
+  const enemyTeam = useBattleStore((s) => s.enemyTeam);
+  const enemyActiveSlot = useBattleStore((s) => s.enemyActiveSlot);
+  const playerTeamIndices = useBattleStore((s) => s.playerTeamIndices);
+  const activeTeamSlot = useBattleStore((s) => s.activeTeamSlot);
   const log = useBattleStore((s) => s.log);
   const phase = useBattleStore((s) => s.phase);
   const outcome = useBattleStore((s) => s.outcome);
 
   const party = usePlayerStore((s) => s.party);
-  const isWild = useCoordinator((s) => s.battleContext?.isWild ?? false);
 
   const [switchPanelOpen, setSwitchPanelOpen] = useState(false);
 
-  const enemySpecies = getSpecies(enemySpeciesId);
-  const activeCreature = party[activeIndex];
+  const enemySlot = enemyTeam[enemyActiveSlot];
+  const enemySpecies = enemySlot ? getSpecies(enemySlot.speciesId) : undefined;
+  const activePartyIndex = playerTeamIndices[activeTeamSlot];
+  const activeCreature = party[activePartyIndex];
   const activeSpecies = activeCreature ? getSpecies(activeCreature.speciesId) : undefined;
   const activeMaxHp = activeSpecies?.baseStats.hp ?? 1;
 
   const prevLogLen = useRef(log.length);
-  const prevEnemyHp = useRef(enemyHp);
+  const prevEnemyHp = useRef(enemySlot?.currentHp ?? 0);
   const prevActiveHp = useRef(activeCreature?.currentHp ?? 0);
   const endedSfxPlayed = useRef(false);
 
@@ -79,11 +85,12 @@ export default function BattleScreen() {
   }, [log.length]);
 
   useEffect(() => {
-    if (prevEnemyHp.current > 0 && enemyHp <= 0) {
+    const hp = enemySlot?.currentHp ?? 0;
+    if (prevEnemyHp.current > 0 && hp <= 0) {
       sfx('faint');
     }
-    prevEnemyHp.current = enemyHp;
-  }, [enemyHp]);
+    prevEnemyHp.current = hp;
+  }, [enemySlot?.currentHp]);
 
   useEffect(() => {
     const hp = activeCreature?.currentHp ?? 0;
@@ -120,9 +127,9 @@ export default function BattleScreen() {
     );
   }
 
-  const livingReserves = party
-    .map((c, i) => ({ c, i }))
-    .filter(({ c, i }) => i !== activeIndex && c.currentHp > 0);
+  const livingReserves = playerTeamIndices
+    .map((partyIndex, slot) => ({ c: party[partyIndex], slot }))
+    .filter(({ c, slot }) => slot !== activeTeamSlot && c.currentHp > 0);
 
   return (
     <div className="w-full h-full flex flex-col bg-gradient-to-b from-sky-950 via-slate-900 to-slate-950 text-white p-4 gap-4">
@@ -130,10 +137,10 @@ export default function BattleScreen() {
       <div className="flex items-center justify-between px-6">
         <div className="w-64">
           <div className="flex justify-between text-sm mb-1">
-            <span className="font-semibold">{enemySpecies.name}</span>
-            <span className="text-slate-400">{enemyHp}/{enemyMaxHp}</span>
+            <span className="font-semibold">{speciesLabel(enemySpecies)}</span>
+            <span className="text-slate-400">{enemySlot.currentHp}/{enemySlot.maxHp}</span>
           </div>
-          <HpBar current={enemyHp} max={enemyMaxHp} />
+          <HpBar current={enemySlot.currentHp} max={enemySlot.maxHp} />
         </div>
         <CreatureShape color={enemySpecies.color} shape={enemySpecies.shape} />
       </div>
@@ -153,7 +160,7 @@ export default function BattleScreen() {
         <CreatureShape color={activeSpecies.color} shape={activeSpecies.shape} />
         <div className="w-64">
           <div className="flex justify-between text-sm mb-1">
-            <span className="font-semibold">{activeSpecies.name}</span>
+            <span className="font-semibold">{speciesLabel(activeSpecies)}</span>
             <span className="text-slate-400">{activeCreature.currentHp}/{activeMaxHp}</span>
           </div>
           <HpBar current={activeCreature.currentHp} max={activeMaxHp} />
@@ -192,18 +199,6 @@ export default function BattleScreen() {
               >
                 切换
               </button>
-              {isWild && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    sfx('select');
-                    useBattleStore.getState().attemptCatch();
-                  }}
-                  className="flex-1 py-2 rounded-md bg-purple-700 hover:bg-purple-600 font-medium"
-                >
-                  收服
-                </button>
-              )}
               <button
                 type="button"
                 onClick={() => {
@@ -229,25 +224,53 @@ export default function BattleScreen() {
           </div>
         )}
 
+        {phase === 'catchOpportunity' && (
+          <div className="flex flex-col gap-3 items-center py-2">
+            <div className="text-sm text-purple-300">野生的 {enemySpecies.name} 似乎露出了破绽，是捕捉它的好机会！</div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  sfx('select');
+                  useBattleStore.getState().attemptCatch();
+                }}
+                className="py-2 px-6 rounded-md bg-purple-700 hover:bg-purple-600 font-semibold"
+              >
+                捕捉！
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  sfx('select');
+                  useBattleStore.getState().skipCatchOpportunity();
+                }}
+                className="py-2 px-6 rounded-md bg-slate-700 hover:bg-slate-600 font-semibold"
+              >
+                放弃
+              </button>
+            </div>
+          </div>
+        )}
+
         {phase === 'choose' && switchPanelOpen && (
           <div className="flex flex-col gap-2">
             <div className="text-sm text-slate-400">选择要换上场的精灵：</div>
             <div className="grid grid-cols-2 gap-2">
-              {livingReserves.map(({ c, i }) => {
+              {livingReserves.map(({ c, slot }) => {
                 const sp = getSpecies(c.speciesId);
                 if (!sp) return null;
                 return (
                   <button
-                    key={i}
+                    key={slot}
                     type="button"
                     onClick={() => {
                       sfx('select');
-                      useBattleStore.getState().switchActive(i);
+                      useBattleStore.getState().switchActive(slot);
                       setSwitchPanelOpen(false);
                     }}
                     className="py-2 px-3 rounded-md bg-slate-700 hover:bg-slate-600 font-medium text-left"
                   >
-                    {sp.name} ({c.currentHp}/{sp.baseStats.hp})
+                    {speciesLabel(sp)} ({c.currentHp}/{sp.baseStats.hp})
                   </button>
                 );
               })}
@@ -267,23 +290,24 @@ export default function BattleScreen() {
 
         {phase === 'forceSwitch' && (
           <div className="flex flex-col gap-2">
-            <div className="text-sm text-yellow-400">{activeSpecies.name} 倒下了！请选择下一只精灵：</div>
+            <div className="text-sm text-yellow-400">{speciesLabel(activeSpecies)} 倒下了！请选择下一只精灵：</div>
             <div className="grid grid-cols-2 gap-2">
-              {party.map((c, i) => {
-                if (c.currentHp <= 0) return null;
+              {playerTeamIndices.map((partyIndex, slot) => {
+                const c = party[partyIndex];
+                if (!c || c.currentHp <= 0) return null;
                 const sp = getSpecies(c.speciesId);
                 if (!sp) return null;
                 return (
                   <button
-                    key={i}
+                    key={slot}
                     type="button"
                     onClick={() => {
                       sfx('select');
-                      useBattleStore.getState().switchActive(i);
+                      useBattleStore.getState().switchActive(slot);
                     }}
                     className="py-2 px-3 rounded-md bg-slate-700 hover:bg-slate-600 font-medium text-left"
                   >
-                    {sp.name} ({c.currentHp}/{sp.baseStats.hp})
+                    {speciesLabel(sp)} ({c.currentHp}/{sp.baseStats.hp})
                   </button>
                 );
               })}

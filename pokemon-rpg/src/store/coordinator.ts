@@ -1,12 +1,23 @@
 import { create } from 'zustand';
 import { usePlayerStore } from './usePlayerStore';
+import { useBattleStore } from './useBattleStore';
 
-export type GameMode = 'title' | 'overworld' | 'battle' | 'dialogue' | 'menu';
+export type GameMode = 'title' | 'overworld' | 'teamSelect' | 'battle' | 'dialogue' | 'menu';
+
+export const MAX_BATTLE_TEAM_SIZE = 3;
 
 export interface BattleContext {
-  speciesId: string;
+  enemyPool: string[];
+  isWild: boolean;
   onWinSetFlag?: string;
-  isWild?: boolean;
+  playerTeamIndices?: number[];
+  enemyTeamSpeciesIds?: string[];
+}
+
+export interface BeginBattleSetupArgs {
+  enemyPool: string[];
+  isWild: boolean;
+  onWinSetFlag?: string;
 }
 
 interface CoordinatorState {
@@ -15,7 +26,8 @@ interface CoordinatorState {
 
   goToTitle: () => void;
   enterOverworld: () => void;
-  enterBattle: (ctx: BattleContext) => void;
+  beginBattleSetup: (args: BeginBattleSetupArgs) => void;
+  confirmBattleTeam: (playerTeamIndices: number[]) => void;
   exitBattle: (result: 'win' | 'lose' | 'flee' | 'caught') => void;
   enterDialogue: () => void;
   exitDialogue: () => void;
@@ -24,7 +36,7 @@ interface CoordinatorState {
 }
 
 /**
- * coordinator 是唯一负责跨领域（overworld/battle/dialogue/menu）状态切换的地方。
+ * coordinator 是唯一负责跨领域（overworld/teamSelect/battle/dialogue/menu）状态切换的地方。
  * useBattleStore / useDialogueStore / useMapStore 之间不直接互相调用，
  * 而是都通过这里的 action 来请求切换 mode。
  */
@@ -36,7 +48,28 @@ export const useCoordinator = create<CoordinatorState>((set, get) => ({
 
   enterOverworld: () => set({ mode: 'overworld', battleContext: null }),
 
-  enterBattle: (ctx) => set({ mode: 'battle', battleContext: ctx }),
+  beginBattleSetup: ({ enemyPool, isWild, onWinSetFlag }) => {
+    set({
+      mode: 'teamSelect',
+      battleContext: { enemyPool, isWild, onWinSetFlag },
+    });
+  },
+
+  confirmBattleTeam: (playerTeamIndices) => {
+    const ctx = get().battleContext;
+    if (!ctx) return;
+
+    const teamSize = Math.min(playerTeamIndices.length, MAX_BATTLE_TEAM_SIZE);
+    const trimmedIndices = playerTeamIndices.slice(0, teamSize);
+    const enemyTeamSpeciesIds = useBattleStore.getState().sampleEnemyTeam(ctx.enemyPool, teamSize);
+
+    set({
+      mode: 'battle',
+      battleContext: { ...ctx, playerTeamIndices: trimmedIndices, enemyTeamSpeciesIds },
+    });
+
+    useBattleStore.getState().startBattle(trimmedIndices, enemyTeamSpeciesIds);
+  },
 
   exitBattle: (result) => {
     const ctx = get().battleContext;

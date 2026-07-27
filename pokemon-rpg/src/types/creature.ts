@@ -1,4 +1,4 @@
-export type ElementType = 'normal' | 'fire' | 'water' | 'grass';
+export type ElementType = 'normal' | 'fire' | 'water' | 'grass' | 'dragon' | 'electric' | 'poison';
 
 export interface Stats {
   hp: number;

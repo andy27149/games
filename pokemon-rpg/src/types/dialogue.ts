@@ -8,7 +8,7 @@ export interface DialogueScript {
   lines: DialogueLine[];
   onComplete?: {
     setFlag?: string;
-    startBattleSpeciesId?: string;
+    startBattleSpeciesIds?: string[];
     onWinSetFlag?: string;
   };
 }

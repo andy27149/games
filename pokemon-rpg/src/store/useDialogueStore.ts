@@ -3,7 +3,6 @@ import { advanceLine } from '../dialogue/dialogueEngine';
 import { dialogues } from '../data/dialogues';
 import { useCoordinator } from './coordinator';
 import { usePlayerStore } from './usePlayerStore';
-import { useBattleStore } from './useBattleStore';
 
 interface DialogueState {
   scriptId: string | null;
@@ -40,12 +39,12 @@ export const useDialogueStore = create<DialogueState>((set, get) => ({
     if (onComplete?.setFlag) {
       usePlayerStore.getState().setFlag(onComplete.setFlag, true);
     }
-    if (onComplete?.startBattleSpeciesId) {
-      useCoordinator.getState().enterBattle({
-        speciesId: onComplete.startBattleSpeciesId,
+    if (onComplete?.startBattleSpeciesIds) {
+      useCoordinator.getState().beginBattleSetup({
+        enemyPool: onComplete.startBattleSpeciesIds,
+        isWild: false,
         onWinSetFlag: onComplete.onWinSetFlag,
       });
-      useBattleStore.getState().startBattle(onComplete.startBattleSpeciesId);
     } else {
       useCoordinator.getState().exitDialogue();
     }
