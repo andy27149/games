@@ -16,6 +16,7 @@ function startNewGame(): void {
     [
       { speciesId: 'pyrocub', currentHp: getStartingHp('pyrocub') },
       { speciesId: 'aquabub', currentHp: getStartingHp('aquabub') },
+      { speciesId: 'tumbleroo', currentHp: getStartingHp('tumbleroo') },
     ],
   );
   useCoordinator.getState().enterOverworld();

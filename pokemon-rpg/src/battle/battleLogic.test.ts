@@ -42,17 +42,27 @@ describe('calculateDamage', () => {
 });
 
 describe('getTurnOrder', () => {
-  it('returns player when rng roll is below 0.5', () => {
-    expect(getTurnOrder(() => 0.3)).toBe('player');
+  it('is a 50/50 boundary when speeds are equal', () => {
+    expect(getTurnOrder(10, 10, () => 0.3)).toBe('player');
+    expect(getTurnOrder(10, 10, () => 0.7)).toBe('enemy');
   });
 
-  it('returns enemy when rng roll is at or above 0.5', () => {
-    expect(getTurnOrder(() => 0.7)).toBe('enemy');
+  it('favors the faster side without guaranteeing it', () => {
+    // playerSpd/(playerSpd+enemySpd) = 100/110 ≈ 0.909, clamped to 0.8
+    expect(getTurnOrder(100, 10, () => 0.75)).toBe('player');
+    expect(getTurnOrder(100, 10, () => 0.85)).toBe('enemy');
   });
 
-  it('is a 50/50 boundary at exactly 0.5', () => {
-    expect(getTurnOrder(() => 0.5)).toBe('enemy');
-    expect(getTurnOrder(() => 0.4999)).toBe('player');
+  it('caps the slower side at a 20% chance to go first, never 0%', () => {
+    // enemySpd/(playerSpd+enemySpd) = 100/110 ≈ 0.909 for enemy, so player's
+    // probability is clamped up from ≈0.091 to the 0.2 floor.
+    expect(getTurnOrder(10, 100, () => 0.15)).toBe('player');
+    expect(getTurnOrder(10, 100, () => 0.25)).toBe('enemy');
+  });
+
+  it('falls back to 50/50 when both speeds are zero', () => {
+    expect(getTurnOrder(0, 0, () => 0.3)).toBe('player');
+    expect(getTurnOrder(0, 0, () => 0.7)).toBe('enemy');
   });
 });
 
@@ -108,12 +118,12 @@ describe('rollGigantamaxMultiplier', () => {
 });
 
 describe('rollCatchOpportunity', () => {
-  it('triggers when rng roll is below 0.4', () => {
+  it('triggers when rng roll is below 0.5', () => {
     expect(rollCatchOpportunity(() => 0.1)).toBe(true);
   });
 
-  it('does not trigger when rng roll is at or above 0.4', () => {
-    expect(rollCatchOpportunity(() => 0.4)).toBe(false);
+  it('does not trigger when rng roll is at or above 0.5', () => {
+    expect(rollCatchOpportunity(() => 0.5)).toBe(false);
     expect(rollCatchOpportunity(() => 0.9)).toBe(false);
   });
 });

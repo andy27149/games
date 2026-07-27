@@ -8,8 +8,19 @@ export function calculateDamage(
   return Math.max(1, Math.floor((movePower * atk * typeMultiplier * gigantamaxMultiplier) / def));
 }
 
-export function getTurnOrder(rng: () => number = Math.random): 'player' | 'enemy' {
-  return rng() < 0.5 ? 'player' : 'enemy';
+/**
+ * 速度更快的一方更可能先手，但结果被限制在 [0.2, 0.8] 区间内，
+ * 保证再悬殊的速度差也保留至少 20% 的逆转概率。
+ */
+export function getTurnOrder(
+  playerSpd: number,
+  enemySpd: number,
+  rng: () => number = Math.random,
+): 'player' | 'enemy' {
+  const totalSpd = playerSpd + enemySpd;
+  const rawPlayerProbability = totalSpd > 0 ? playerSpd / totalSpd : 0.5;
+  const playerProbability = Math.min(0.8, Math.max(0.2, rawPlayerProbability));
+  return rng() < playerProbability ? 'player' : 'enemy';
 }
 
 export function rollHit(accuracy: number, rng: () => number = Math.random): boolean {
@@ -35,7 +46,7 @@ export function rollGigantamaxMultiplier(rng: () => number = Math.random): numbe
 
 /** 击倒野生精灵后，是否出现捕捉机会。 */
 export function rollCatchOpportunity(rng: () => number = Math.random): boolean {
-  return rng() < 0.4;
+  return rng() < 0.5;
 }
 
 /** 捕捉尝试是否成功：60%~70% 概率。 */

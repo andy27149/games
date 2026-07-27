@@ -229,7 +229,8 @@ export const useBattleStore = create<BattleState>((set, get) => {
       const playerGmx = state.playerGigantamax[activeTeamSlot];
       const enemyGmx = state.enemyGigantamax[enemyActiveSlot];
 
-      const firstIsPlayer = getTurnOrder() === 'player';
+      const firstIsPlayer =
+        getTurnOrder(playerSpecies.baseStats.spd, enemySpecies.baseStats.spd) === 'player';
 
       /** 玩家出招：读取/写入 store 里的最新敌方槽位血量。 */
       const playerAttackStep = (): void => {
