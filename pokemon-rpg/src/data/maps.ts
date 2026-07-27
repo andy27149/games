@@ -49,7 +49,7 @@ export const maps: Record<string, MapDef> = {
     tileSize: 32,
     tiles,
     npcs,
-    encounterSpeciesIds: ['sprigling', 'tumbleroo', 'rivulon', 'voltpup', 'toxinail'],
+    encounterSpeciesIds: ['sprigling', 'tumbleroo', 'rivulon', 'voltpup', 'toxinail', 'draconyx'],
     encounterRate: 0.2,
     playerSpawn: { x: 11, y: 15 },
   },

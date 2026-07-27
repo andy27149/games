@@ -38,6 +38,13 @@ export function rollCatchOpportunity(rng: () => number = Math.random): boolean {
   return rng() < 0.4;
 }
 
+/** 捕捉尝试是否成功：60%~70% 概率。 */
+export function rollCatchSuccess(rng: () => number = Math.random): boolean {
+  const thresholdPercent = 60 + rng() * 10;
+  const roll = rng() * 100;
+  return roll < thresholdPercent;
+}
+
 /** 从候选池中采样 n 个 speciesId 组成敌方队伍；池子不够大时允许重复采样。 */
 export function sampleTeam(pool: string[], n: number, rng: () => number = Math.random): string[] {
   if (pool.length === 0) return [];

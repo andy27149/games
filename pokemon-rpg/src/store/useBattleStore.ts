@@ -12,6 +12,7 @@ import {
   rollGigantamax,
   rollGigantamaxMultiplier,
   rollCatchOpportunity,
+  rollCatchSuccess,
   sampleTeam,
 } from '../battle/battleLogic';
 import type { Species, Move, CreatureInstance } from '../types/creature';
@@ -349,7 +350,6 @@ export const useBattleStore = create<BattleState>((set, get) => {
       if (state.phase !== 'catchOpportunity') return;
 
       const enemySpecies = getSpecies(state.enemyTeam[state.enemyActiveSlot].speciesId);
-      const chance = Math.floor(Math.random() * 100) + 1;
 
       set((s) => ({
         log: [...s.log, `你向 ${enemySpecies.name} 投出了精灵球！`],
@@ -357,8 +357,7 @@ export const useBattleStore = create<BattleState>((set, get) => {
       }));
 
       setTimeout(() => {
-        const roll = Math.floor(Math.random() * 100) + 1;
-        const success = roll <= chance;
+        const success = rollCatchSuccess();
 
         if (success) {
           const caught: CreatureInstance = { speciesId: enemySpecies.id, currentHp: enemySpecies.baseStats.hp };

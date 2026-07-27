@@ -7,6 +7,7 @@ import {
   rollGigantamax,
   rollGigantamaxMultiplier,
   rollCatchOpportunity,
+  rollCatchSuccess,
   sampleTeam,
 } from './battleLogic';
 
@@ -114,6 +115,18 @@ describe('rollCatchOpportunity', () => {
   it('does not trigger when rng roll is at or above 0.4', () => {
     expect(rollCatchOpportunity(() => 0.4)).toBe(false);
     expect(rollCatchOpportunity(() => 0.9)).toBe(false);
+  });
+});
+
+describe('rollCatchSuccess', () => {
+  it('succeeds when the roll lands below the rolled threshold', () => {
+    // first rng() call sets threshold to 60 + 0*10 = 60; second call rolls 0 * 100 = 0, which is < 60
+    expect(rollCatchSuccess(() => 0)).toBe(true);
+  });
+
+  it('fails when the roll lands above the max possible threshold', () => {
+    // threshold maxes out at 70; a roll of 0.99*100=99 will never be below it
+    expect(rollCatchSuccess(() => 0.99)).toBe(false);
   });
 });
 
