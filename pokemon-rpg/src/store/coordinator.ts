@@ -2,9 +2,13 @@ import { create } from 'zustand';
 import { usePlayerStore } from './usePlayerStore';
 import { useBattleStore } from './useBattleStore';
 
-export type GameMode = 'title' | 'overworld' | 'teamSelect' | 'battle' | 'dialogue' | 'menu';
+export type GameMode = 'title' | 'overworld' | 'teamSelect' | 'battle' | 'dialogue' | 'menu' | 'release';
 
 export const MAX_BATTLE_TEAM_SIZE = 3;
+/** 队伍超过这个数量时，强制弹出放生界面。 */
+export const PARTY_RELEASE_THRESHOLD = 27;
+/** 每次强制放生必须选够的数量。 */
+export const RELEASE_COUNT = 3;
 
 export interface BattleContext {
   enemyPool: string[];
@@ -29,6 +33,7 @@ interface CoordinatorState {
   beginBattleSetup: (args: BeginBattleSetupArgs) => void;
   confirmBattleTeam: (playerTeamIndices: number[]) => void;
   exitBattle: (result: 'win' | 'lose' | 'flee' | 'caught') => void;
+  confirmRelease: (partyIndices: number[]) => void;
   enterDialogue: () => void;
   exitDialogue: () => void;
   openMenu: () => void;
@@ -79,7 +84,16 @@ export const useCoordinator = create<CoordinatorState>((set, get) => ({
     if (result === 'lose') {
       usePlayerStore.getState().handleBlackout();
     }
+    if (usePlayerStore.getState().party.length > PARTY_RELEASE_THRESHOLD) {
+      set({ mode: 'release', battleContext: null });
+      return;
+    }
     set({ mode: 'overworld', battleContext: null });
+  },
+
+  confirmRelease: (partyIndices) => {
+    usePlayerStore.getState().releaseCreatures(partyIndices);
+    set({ mode: 'overworld' });
   },
 
   enterDialogue: () => set({ mode: 'dialogue' }),

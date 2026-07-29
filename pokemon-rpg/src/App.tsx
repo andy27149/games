@@ -2,6 +2,7 @@ import { useCoordinator } from './store/coordinator';
 import TitleScreen from './ui/TitleScreen';
 import MapCanvas from './map/MapCanvas';
 import TeamSelectScreen from './ui/TeamSelectScreen';
+import ReleaseScreen from './ui/ReleaseScreen';
 import BattleScreen from './ui/BattleScreen';
 import DialogueBox from './ui/DialogueBox';
 import PartyMenu from './ui/PartyMenu';
@@ -22,6 +23,8 @@ function App() {
       )}
 
       {mode === 'teamSelect' && <TeamSelectScreen />}
+
+      {mode === 'release' && <ReleaseScreen />}
 
       {mode === 'battle' && <BattleScreen />}
 

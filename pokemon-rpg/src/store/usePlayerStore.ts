@@ -23,6 +23,8 @@ interface PlayerState {
   setFlag: (flag: string, value: boolean) => void;
   setParty: (party: CreatureInstance[]) => void;
   updateCreatureHp: (index: number, currentHp: number) => void;
+  /** 按下标永久移除若干只精灵（放生），不可撤销。 */
+  releaseCreatures: (indices: number[]) => void;
   /** 队伍团灭后送回出生点并回满血，仿照正统 Pokémon 的黑屏机制。 */
   handleBlackout: () => void;
 
@@ -61,6 +63,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   updateCreatureHp: (index, currentHp) =>
     set((state) => ({
       party: state.party.map((c, i) => (i === index ? { ...c, currentHp } : c)),
+    })),
+
+  releaseCreatures: (indices) =>
+    set((state) => ({
+      party: state.party.filter((_, i) => !indices.includes(i)),
     })),
 
   handleBlackout: () => {

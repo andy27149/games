@@ -3,7 +3,7 @@ import type { Species } from '../types/creature';
 export const species: Species[] = [
   {
     id: 'pyrocub',
-    name: 'Pyrocub',
+    name: '酋雷姆',
     type: 'fire',
     baseStats: { hp: 40, atk: 9, def: 20, spd: 16 },
     moveIds: ['ember', 'flame_burst', 'tackle', 'quick_strike'],
@@ -12,7 +12,7 @@ export const species: Species[] = [
   },
   {
     id: 'aquabub',
-    name: 'Aquabub',
+    name: '大力鳄',
     type: 'water',
     baseStats: { hp: 44, atk: 8, def: 22, spd: 12 },
     moveIds: ['water_jet', 'bubble_beam', 'tackle', 'quick_strike'],
@@ -21,7 +21,7 @@ export const species: Species[] = [
   },
   {
     id: 'sprigling',
-    name: 'Sprigling',
+    name: '大竺葵',
     type: 'grass',
     baseStats: { hp: 36, atk: 10, def: 18, spd: 18 },
     moveIds: ['vine_whip', 'leaf_storm', 'tackle', 'quick_strike'],
@@ -30,7 +30,7 @@ export const species: Species[] = [
   },
   {
     id: 'tumbleroo',
-    name: 'Tumbleroo',
+    name: '超梦',
     type: 'normal',
     baseStats: { hp: 46, atk: 9, def: 24, spd: 10 },
     moveIds: ['tackle', 'quick_strike', 'ember', 'water_jet'],
@@ -48,7 +48,7 @@ export const species: Species[] = [
   },
   {
     id: 'draconyx',
-    name: 'Draconyx',
+    name: '裂空座',
     type: 'dragon',
     baseStats: { hp: 42, atk: 11, def: 20, spd: 14 },
     moveIds: ['kanglong_youhui', 'longxiao_jiutian', 'liuxing_qun', 'shiguang_paoxiao'],
@@ -57,7 +57,7 @@ export const species: Species[] = [
   },
   {
     id: 'voltpup',
-    name: 'Voltpup',
+    name: '皮卡丘',
     type: 'electric',
     baseStats: { hp: 32, atk: 9, def: 14, spd: 26 },
     moveIds: ['jiaocuo_shandian', 'poyin', 'shiwan_fute', 'leiting_wanjun'],
@@ -66,7 +66,7 @@ export const species: Species[] = [
   },
   {
     id: 'toxinail',
-    name: 'Toxinail',
+    name: '颤弦蝾螈',
     type: 'poison',
     baseStats: { hp: 38, atk: 10, def: 18, spd: 12 },
     moveIds: ['du_ya', 'du_qi', 'wuni_bo', 'heding_zhiye'],

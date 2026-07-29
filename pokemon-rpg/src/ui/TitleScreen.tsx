@@ -34,7 +34,7 @@ export default function TitleScreen() {
     <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-slate-950 via-slate-900 to-emerald-950 gap-10">
       <div className="flex flex-col items-center gap-2">
         <h1 className="text-5xl font-extrabold tracking-wide text-emerald-300 drop-shadow-[0_2px_10px_rgba(16,185,129,0.5)]">
-          精灵物语
+          宝可梦明耀之星
         </h1>
         <p className="text-slate-400 text-sm tracking-widest uppercase">
           Pocket Creature Adventure
