@@ -50,7 +50,7 @@ export default function TeamSelectScreen() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full max-w-2xl">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full max-w-2xl max-h-[60vh] overflow-y-auto">
         {livingIndices.map((i) => {
           const creature = party[i];
           const sp = getSpecies(creature.speciesId);
